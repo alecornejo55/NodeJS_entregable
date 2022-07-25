@@ -2,9 +2,9 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const { MONGO_URI } = require('./src/config/globals');
-// persistencia por filestore
-const fileStore = require('session-file-store')(session);
-
+// instanciamos passport
+const passport = require('passport');
+const { initializePassport } = require('./src/config/passport.config');
 // persistencia por MongoDb y Atlas
 const MongoStore = require('connect-mongo');
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
@@ -28,6 +28,7 @@ const indexRoute = require('./src/routes/index');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 app.use(session({
     store: MongoStore.create({
         mongoUrl: MONGO_URI,
@@ -42,6 +43,9 @@ app.use(session({
     }
 }));
 
+initializePassport();
+app.use(passport.initialize());
+app.use(passport.session());
 app.set('views', './views');
 app.use('/', indexRoute);
 app.use(express.static(__dirname + "/src/public"));

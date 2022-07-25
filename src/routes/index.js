@@ -10,28 +10,28 @@ const normalizer = new Normalizador();
 const { ProductDaoMongo } = require('../daos/productos/ProductoDaoMongo');
 const { ChatDaoMongo } = require('../daos/chat/ChatDaoMongo');
 const { UserDaoMongo } = require('../daos/user/UserDaoMongo');
+const passport = require('passport');
 
 const chat = new ChatDaoMongo();
 const producto = new ProductDaoMongo();
 const user = new UserDaoMongo();
 
 function auth(req, res, next) {
-    if (req.session.user) {
+    // console.log(req.user);
+    if (req.user) {
         return res.redirect('/');
     }
     next();
 }
 router.get('/', (req, res) => {
-    console.log(req.session.user);
-
-    if (!req.session.user) {
+    if (!req.user) {
         return res.redirect('/login');
-        // console.log(req.session.user);
     }
+    // console.log(req.session);
 
     const io = req.app.get('socketio');
     io.on('connection', async (socket) => {
-        console.log('Un cliente se ha conectado');
+        // console.log('Un cliente se ha conectado');
         const productos = await producto.getAll();
         socket.emit('productos', productos);
     
@@ -40,8 +40,9 @@ router.get('/', (req, res) => {
         // console.log("data", data, "FIN");
         socket.emit('messages', data);
 
+        // console.log(req.session.user.username);
         //Envío datos de la sesión
-        const username = req.session.user;
+        const username = req.user.username;
         socket.emit('user', username);
     
         socket.on('new-producto', async (data) => {
@@ -63,40 +64,20 @@ router.get('/', (req, res) => {
 router.get('/login', auth, (req, res) => {
     res.sendFile(path.join(__dirname,'../public','/auth/login.html'));
 });
-router.post('/login', async (req, res) => {
-    const {username, password} = req.body;
-    const userDB = await user.getByUsername(username);
-    const comp = userDB.comparePassword(password, userDB.password);
-    if(comp){
-        req.session.user = userDB;
-        res.redirect('/');
-    }
-    else {
-        res.redirect('/login');
-    }
+router.post('/login', passport.authenticate('login', { failureRedirect: '/errorLogin' }), (req, res) => {
+    res.redirect('/');
 });
+
 router.get('/signup', auth, (req, res) => {
     res.sendFile(path.join(__dirname,'../public','/auth/signup.html'));
 });
-router.post('/signup', (req,res) => {
-    const {username, password} = req.body;
-    user.save({username, password});
+router.post('/signup', passport.authenticate('signup', { failureRedirect: '/errorSignUp'}), (req, res) => {
     res.redirect('/login');
 })
-router.get('/con-session', (req, res) => {
-    if(req.session.contador){
-        req.session.contador++; // incrementa el contador
-        res.send(`Ud ha visitado el sitio ${req.session.contador} veces`);
-    } 
-    else {
-        req.session.contador = 1; // inicializa el contador
-        req.session.user = 'Alex';
-        res.send(`Bienvenido a nuestro sitio`);
-    }
-});
+
 router.get('/logout', (req, res) => {
-    if(!req.session.user){
-        res.redirect('/login');
+    if(!req.user){
+        return res.redirect('/login');
     }
     if (req.session) {
         req.session.destroy(() => {
@@ -104,6 +85,14 @@ router.get('/logout', (req, res) => {
         });
     }
     res.sendFile(path.join(__dirname,'../public','/auth/logout.html'));
+});
+
+router.get('/errorSignUp', (req, res) => {
+    res.sendFile(path.join(__dirname,'../public','/auth/errorSignUp.html'));
+});
+
+router.get('/errorLogin', (req, res) => {
+    res.sendFile(path.join(__dirname,'../public','/auth/errorLogin.html'));
 });
 
 module.exports = router;

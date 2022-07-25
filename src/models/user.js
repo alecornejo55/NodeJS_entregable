@@ -13,13 +13,13 @@ userSchema.methods.toJSON = function(){
 }
 
 //helpful functions: encrypt password
-userSchema.pre("save", function(next) {
-    if (!this.isModified("password")) {
-        return next();
-    }
-    this.password = bcrypt.hashSync(this.password, 10);
-    next();
-});
+// userSchema.pre("save", function(next) {
+//     if (!this.isModified("password")) {
+//         return next();
+//     }
+//     this.password = bcrypt.hashSync(this.password, 10);
+//     next();
+// });
 
 //helpful functions: compare passwords
 userSchema.methods.comparePassword = (password, hash) => {

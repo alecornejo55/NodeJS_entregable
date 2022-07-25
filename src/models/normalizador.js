@@ -7,17 +7,6 @@ class Normalizador {
         console.log(util.inspect(objeto,false,12,true))
     }
     getDataNormalized(dataToNormalize) {
-
-        // const messages = JSON.parse(JSON.stringify(dataToNormalize));
-        // const authorSchema = new schema.Entity('authors')
-        // const messageSchema = new schema.Entity('mensajes', {
-        //     author: authorSchema,
-        // },{idAttribute:'_id'});
-        // const chat = new schema.Entity('global', {
-        //     text: [messageSchema],
-        // });
-        // const data = { id: 'text', messages }
-        // console.log(dataToNormalize);
         const messages = JSON.parse(JSON.stringify(dataToNormalize));
         const authorSchema = new schema.Entity('authors')
         const messageSchema = new schema.Entity('mensajes', {
@@ -50,7 +39,7 @@ class Normalizador {
         // console.log(JSON.stringify(normalizedData).length);
 
         /*
-        console.log(data_to_normalize);
+        // console.log(data_to_normalize);
         const messages = JSON.parse(JSON.stringify(data_to_normalize));
         const authorSchema = new schema.Entity('authors')
         const messageSchema = new schema.Entity('mensajes', {

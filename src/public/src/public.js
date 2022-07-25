@@ -30,7 +30,7 @@ form.addEventListener('submit', async (e) => {
         price: formData.get('price'),
         thumbnail: formData.get('thumbnail')
     };
-    console.log(newProducto);
+    // console.log(newProducto);
     try {
         socket.emit('new-producto', newProducto);
         Swal.fire(
@@ -64,7 +64,7 @@ formChat.addEventListener('submit', async (e) => {
         text:  formData.get('message'),
         // dateTime: new Date().toLocaleString("es-AR"),
     };
-    console.log(newProducto);
+    // console.log(newProducto);
     try {
         socket.emit('new-message', newProducto);
         document.querySelector("#message").value = '';
